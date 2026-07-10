@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Tadreeby – منصة ذكية لإدارة التدريب</title>
+    <script src="https://unpkg.com/lucide@latest">
+    </script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@200;300;400;500;600;700&family=Cairo:wght@200;300;400;500;600;700;800;900&family=Alexandria:wght@200;300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --blue: #1677FF;
+            --light-blue: #EEF5FF;
+            --orange: #FCA83E;
+            --light-orange: #FFE8CC;
+            --dark-orange: #FD7C0B;
+            --soft-orange: #FDF1EB;
+            --green: #1E8B3F;
+            --light-green: #F7FCFB;
+            --purple: #AB50F7;
+            --light-purple: #F4EDFF;
+            --pink: #FE39EB;
+            --white: #FFFFFF;
+            --bg: #FAFBFC;
+            --text: #1a1a2e;
+            --text-secondary: #5a5a7a;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.9);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.10), 0 8px 24px rgba(0, 0, 0, 0.06);
+            --radius-sm: 12px;
+            --radius-md: 18px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --transition: 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans Arabic', 'Cairo', 'Alexandria', sans-serif;
+            background: #0a0a14;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .presentation {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.97);
+            transition: opacity 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
+                transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: scale(1);
+            z-index: 10;
+        }
+
+        .slide.exit-left {
+            opacity: 0;
+            transform: translateX(-60px) scale(0.96);
+        }
+
+        .slide.exit-right {
+            opacity: 0;
+            transform: translateX(60px) scale(0.96);
+        }
+
+        .slide.enter-left {
+            opacity: 0;
+            transform: translateX(-40px) scale(0.98);
+        }
+
+        .slide.enter-right {
+            opacity: 0;
+            transform: translateX(40px) scale(0.98);
+        }
+
+        .slide-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .cover-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 20%, #EEF5FF 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 70%, #FDF1EB 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, #FFFFFF 0%, #FAFBFC 100%);
+            z-index: -1;
+        }
+
+        .cover-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+            animation: coverShapeFloat 12s ease-in-out infinite;
+        }
+
+        .cover-shape.shape1 {
+            width: 350px;
+            height: 350px;
+            background: #EEF5FF;
+            top: -8%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .cover-shape.shape2 {
+            width: 280px;
+            height: 280px;
+            background: #FDF1EB;
+            bottom: -6%;
+            right: 8%;
+            animation-delay: -4s;
+        }
+
+        .cover-shape.shape3 {
+            width: 200px;
+            height: 200px;
+            background: rgba(22, 119, 255, 0.08);
+            top: 50%;
+            left: 55%;
+            animation-delay: -8s;
+        }
+
+        @keyframes coverShapeFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            25% {
+                transform: translate(30px, -25px) scale(1.08);
+            }
+
+            50% {
+                transform: translate(-15px, 20px) scale(0.94);
+            }
+
+            75% {
+                transform: translate(-25px, -15px) scale(1.04);
+            }
+        }
+
+        .floating-notification {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-radius: 14px;
+            padding: 8px 14px;
+            font-size: 0.76rem;
+            font-weight: 500;
+            color: var(--text);
+            box-shadow: var(--shadow-lg);
+            z-index: 2;
+            pointer-events: none;
+            white-space: nowrap;
+            animation: floatNotification 14s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .floating-notification .notif-icon {
+            font-size: 1rem;
+            color: var(--blue);
+        }
+
+        .floating-notification.n1 {
+            top: 28%;
+            left: 18%;
+            animation-delay: 0s;
+        }
+
+        .floating-notification.n2 {
+            top: 28%;
+            right: 18%;
+            animation-delay: -2s;
+        }
+
+        .floating-notification.n3 {
+            top: 42%;
+            left: 10%;
+            animation-delay: -5s;
+        }
+
+        .floating-notification.n4 {
+            top: 42%;
+            right: 10%;
+            animation-delay: -7s;
+        }
+
+        .floating-notification.n5 {
+            top: 56%;
+            left: 18%;
+            animation-delay: -3s;
+        }
+
+        .floating-notification.n6 {
+            top: 56%;
+            right: 18%;
+            animation-delay: -9s;
+        }
+
+        @keyframes floatNotification {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) scale(1);
+            }
+
+            15% {
+                transform: translateY(-12px) translateX(6px) scale(1.02);
+            }
+
+            30% {
+                transform: translateY(-6px) translateX(-6px) scale(0.98);
+            }
+
+            45% {
+                transform: translateY(-16px) translateX(4px) scale(1.03);
+            }
+
+            60% {
+                transform: translateY(-4px) translateX(-8px) scale(0.97);
+            }
+
+            75% {
+                transform: translateY(-12px) translateX(6px) scale(1.02);
+            }
+
+            90% {
+                transform: translateY(-2px) translateX(-2px) scale(0.99);
+            }
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 1.3rem;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatIcon 16s ease-in-out infinite;
+            color: var(--blue);
+        }
+
+        .floating-icon.i1 {
+            top: 22%;
+            left: 32%;
+            animation-delay: 0s;
+        }
+
+        .floating-icon.i2 {
+            top: 30%;
+            right: 30%;
+            animation-delay: -3s;
+        }
+
+        .floating-icon.i3 {
+            top: 52%;
+            left: 28%;
+            animation-delay: -6s;
+        }
+
+        .floating-icon.i4 {
+            top: 48%;
+            right: 28%;
+            animation-delay: -9s;
+        }
+
+        .floating-icon.i5 {
+            top: 68%;
+            left: 34%;
+            animation-delay: -12s;
+        }
+
+        .floating-icon.i6 {
+            top: 65%;
+            right: 32%;
+            animation-delay: -4s;
+        }
+
+        @keyframes floatIcon {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+
+            20% {
+                transform: translateY(-18px) translateX(10px) rotate(4deg);
+            }
+
+            40% {
+                transform: translateY(-4px) translateX(-8px) rotate(-2deg);
+            }
+
+            60% {
+                transform: translateY(-22px) translateX(6px) rotate(3deg);
+            }
+
+            80% {
+                transform: translateY(-8px) translateX(-10px) rotate(-1deg);
+            }
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 5;
+            width: 90%;
+            max-width: 1200px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .logo-main {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #1677FF, #3B8EFF);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+            box-shadow: 0 12px 40px rgba(22, 119, 255, 0.3);
+            animation: logoZoom 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes logoZoom {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .slide-title {
+            font-family: 'Alexandria', 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: #1a1a2e;
+            letter-spacing: -0.5px;
+            line-height: 1.3;
+        }
+
+        .slide-subtitle {
+            font-weight: 400;
+            font-size: 1rem;
+            color: #5a5a7a;
+            max-width: 550px;
+            line-height: 1.6;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.9rem;
+            width: 100%;
+            max-width: 1050px;
+        }
+
+        .cards-grid.cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .cards-grid.cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .cards-grid.cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .roles-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.9rem;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+            opacity: 0;
+            transform: translateY(24px);
+            cursor: default;
+        }
+
+        .glass-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: rgba(22, 119, 255, 0.25);
+            background: rgba(255, 255, 255, 0.78);
+        }
+
+        .glass-card .card-icon {
+            font-size: 1.7rem;
+            margin-bottom: 0.3rem;
+            color: var(--blue);
+        }
+
+        .glass-card h3 {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a1a2e;
+            margin-bottom: 0.2rem;
+        }
+
+        .glass-card p {
+            font-weight: 400;
+            font-size: 0.75rem;
+            color: #5a5a7a;
+            line-height: 1.4;
+        }
+
+        .glass-card.purple-accent {
+            border-left: 3px solid var(--purple);
+        }
+
+        .glass-card.orange-accent {
+            border-left: 3px solid var(--orange);
+        }
+
+        .glass-card.green-accent {
+            border-left: 3px solid var(--green);
+        }
+
+        .glass-card.blue-accent {
+            border-left: 3px solid var(--blue);
+        }
+
+        .team-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            padding: 1.5rem 1rem;
+            overflow: hidden;
+        }
+
+        .team-avatar {
+            width: 72px;
+            height: 72px;
+
+            border-radius: 50%;
+            object-fit: cover;
+
+            display: block;
+            margin-bottom: 12px;
+
+            border: 3px solid #fff;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .15);
+        }
+
+        .team-card h3 {
+            margin: 0 0 4px;
+        }
+
+        .team-card p {
+            margin: 0;
+        }
+
+        .highlight-title {
+            font-weight: 600;
+            font-size: 3.2rem;
+            color: #1677FF;
+            background: rgba(22, 119, 255, 0.06);
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 0.2rem;
+        }
+
+        .highlight-title.orange-highlight {
+            color: #FD7C0B;
+            background: rgba(252, 168, 62, 0.08);
+        }
+
+        .highlight-title.green-highlight {
+            color: #1E8B3F;
+            background: rgba(30, 139, 63, 0.06);
+        }
+
+        .highlight-title.purple-highlight {
+            color: #AB50F7;
+            background: rgba(171, 80, 247, 0.06);
+        }
+
+        .highlight-statement {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1677FF;
+            background: rgba(22, 119, 255, 0.06);
+            padding: 0.5rem 1.6rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 0.2rem;
+        }
+
+        .highlight-statement.orange-highlight {
+            color: #FD7C0B;
+            background: rgba(252, 168, 62, 0.08);
+        }
+
+        .highlight-statement.green-highlight {
+            color: #1E8B3F;
+            background: rgba(30, 139, 63, 0.06);
+        }
+
+        .highlight-statement.purple-highlight {
+            color: #AB50F7;
+            background: rgba(171, 80, 247, 0.06);
+        }
+
+        .highlight-statement.blue-highlight {
+            color: #1677FF;
+            background: rgba(22, 119, 255, 0.07);
+        }
+
+        .slide-footer {
+            position: absolute;
+            bottom: 0.8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            color: #999;
+            z-index: 5;
+        }
+
+        .nav-arrows {
+            position: fixed;
+            bottom: 1.6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+            align-items: center;
+        }
+
+        .nav-arrow {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #1a1a2e;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-arrow:hover {
+            background: #fff;
+            box-shadow: var(--shadow-lg);
+            transform: scale(1.07);
+            color: #1677FF;
+        }
+
+        .nav-dots {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .nav-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #d0d5dd;
+            cursor: pointer;
+            transition: all 0.35s ease;
+        }
+
+        .nav-dot.active {
+            background: #1677FF;
+            width: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(22, 119, 255, 0.35);
+        }
+
+        .phone-mockup {
+            width: 140px;
+            height: 260px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: var(--shadow-xl);
+            border: 3px solid #e0e4ea;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8f9fb, #eef2f8);
+            position: relative;
+        }
+
+        .phone-mockup .camera-notch {
+            width: 30px;
+            height: 4px;
+            background: #d0d5dd;
+            border-radius: 6px;
+            position: absolute;
+            top: 8px;
+        }
+
+        .laptop-mockup {
+            width: 400px;
+            height: 250px;
+            background: #1a1a2e;
+            border-radius: 16px 16px 5px 5px;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            border: 3px solid #2a2a3e;
+        }
+
+        .laptop-mockup .screen {
+            position: absolute;
+            inset: 5px 5px 22px 5px;
+            background: #f8f9fb;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #1677FF;
+            font-size: 0.85rem;
+            gap: 6px;
+        }
+
+        .laptop-mockup .keyboard-line {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30%;
+            height: 2.5px;
+            background: #3a3a4e;
+            border-radius: 3px;
+        }
+
+        .solution-mockups {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .laptop-mockup.large {
+            width: 560px;
+            height: 350px;
+            border-radius: 20px 20px 6px 6px;
+            flex-shrink: 0;
+        }
+
+        .laptop-mockup.large .screen {
+            inset: 6px 6px 28px 6px;
+            border-radius: 14px 14px 0 0;
+            font-size: 1rem;
+        }
+
+        .phone-mockup.small {
+            width: 120px;
+            height: 220px;
+            border-radius: 20px;
+            position: absolute;
+            bottom: -10px;
+            left: -20px;
+            box-shadow: var(--shadow-xl);
+            z-index: 2;
+        }
+
+        .solution-feature-card {
+            background: rgba(22, 119, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(22, 119, 255, 0.15);
+            border-radius: var(--radius-lg);
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1a1a2e;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(16px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-align: right;
+        }
+
+        .solution-feature-card.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .solution-feature-card:nth-child(odd) {
+            background: rgba(22, 119, 255, 0.06);
+            border-color: var(--blue);
+        }
+
+        .solution-feature-card:nth-child(even) {
+            background: rgba(252, 168, 62, 0.06);
+            border-color: var(--dark-orange);
+        }
+
+        .solution-feature-card i {
+            color: var(--light-blue);
+            flex-shrink: 0;
+        }
+
+        .solution-feature-card:nth-child(even) i {
+            color: var(--light-orange);
+        }
+
+        .cycle-container {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            margin: 0 auto;
+        }
+
+        .cycle-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--blue);
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .cycle-node {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(22, 119, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+            z-index: 4;
+            box-shadow: var(--shadow-md);
+            color: #1a1a2e;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s ease;
+        }
+
+        .cycle-node i {
+            font-size: 1.4rem;
+            color: var(--blue);
+            margin-bottom: 2px;
+        }
+
+        .cycle-connector {
+            position: absolute;
+            border: 2px dashed rgba(22, 119, 255, 0.3);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            z-index: 2;
+            animation: orbitRotate 18s linear infinite;
+        }
+
+        @keyframes orbitRotate {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .comparison-table {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .table-header,
+        .table-row {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr 1fr 1fr 1.3fr;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .table-cell {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-radius: var(--radius-md);
+            padding: 0.7rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1a1a2e;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        .table-cell.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .table-header .table-cell {
+            font-weight: 700;
+            background: rgba(22, 119, 255, 0.08);
+            border-color: rgba(22, 119, 255, 0.3);
+            color: #1677FF;
+            font-size: 0.8rem;
+        }
+
+        .table-cell.tadreeby-cell {
+            background: rgba(22, 119, 255, 0.1);
+            border-color: rgba(22, 119, 255, 0.4);
+            font-weight: 600;
+            color: #1677FF;
+        }
+
+        .table-cell .check-icon {
+            color: var(--green);
+        }
+
+        .table-cell .cross-icon {
+            color: #ccc;
+        }
+
+        .table-cell .partial-icon {
+            color: var(--orange);
+        }
+
+        .internship-cycle-wrapper {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            margin: 0 auto;
+        }
+
+        .internship-bg-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            border: 6px solid #e8ecf2;
+            z-index: 1;
+        }
+
+        .internship-progress-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .internship-node {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #e8ecf2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #5a5a7a;
+            z-index: 3;
+            box-shadow: var(--shadow-md);
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .internship-node.revealed {
+            opacity: 1;
+        }
+
+        .internship-node.completed {
+            background: var(--blue);
+            color: #fff;
+            border-color: var(--blue);
+            box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+        }
+
+        .internship-node.final-step {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+            box-shadow: 0 4px 12px rgba(30, 139, 63, 0.3);
+        }
+
+        .internship-label {
+            position: absolute;
+            font-size: 0.55rem;
+            font-weight: 600;
+            color: #5a5a7a;
+            text-align: center;
+            max-width: 70px;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+
+        .internship-label.revealed {
+            opacity: 1;
+        }
+
+        .internship-center-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 50%;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .internship-center-content h3 {
+            font-family: 'Alexandria', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .thankyou-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 30%, #EEF5FF 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, #FDF1EB 0%, transparent 50%), #FFFFFF;
+            z-index: -1;
+        }
+
+        .team-grid-3-3-1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .team-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .team-row .glass-card {
+            flex: 0 0 200px;
+            max-width: 200px;
+        }
+
+        .qa-big-number {
+            font-family: 'Alexandria', sans-serif;
+            font-size: 5rem;
+            font-weight: 800;
+            color: #1677FF;
+            background: rgba(22, 119, 255, 0.08);
+            border-radius: 50px;
+            padding: 0.5rem 2.5rem;
+            display: inline-block;
+            margin: 0.5rem 0;
+            box-shadow: 0 8px 24px rgba(22, 119, 255, 0.1);
+        }
+
+        .qa-sub {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #3a3a5a;
+        }
+
+        @media (max-width:900px) {
+            .slide-title {
+                font-size: 1.5rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+            }
+
+            .cards-grid.cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .cards-grid.cols-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .roles-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .laptop-mockup.large {
+                width: 380px;
+                height: 240px;
+            }
+
+            .phone-mockup.small {
+                width: 90px;
+                height: 170px;
+                left: -10px;
+                bottom: -5px;
+            }
+
+            .cycle-container {
+                width: 300px;
+                height: 300px;
+            }
+
+            .cycle-connector {
+                width: 250px;
+                height: 250px;
+            }
+
+            .cycle-node {
+                width: 50px;
+                height: 50px;
+                font-size: 0.55rem;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1.4fr 0.9fr 0.9fr 0.9fr 1.2fr;
+            }
+
+            .table-cell {
+                font-size: 0.65rem;
+                padding: 0.5rem 0.3rem;
+            }
+
+            .internship-cycle-wrapper {
+                width: 360px;
+                height: 360px;
+            }
+
+            .internship-bg-circle,
+            .internship-progress-circle {
+                width: 300px;
+                height: 300px;
+            }
+
+            .internship-node {
+                width: 38px;
+                height: 38px;
+                font-size: 0.7rem;
+            }
+
+            .internship-center-content {
+                width: 110px;
+                height: 110px;
+            }
+
+            .internship-center-content h3 {
+                font-size: 0.7rem;
+            }
+
+            .team-row .glass-card {
+                flex: 0 0 160px;
+                max-width: 160px;
+            }
+
+            .qa-big-number {
+                font-size: 3.5rem;
+                padding: 0.4rem 1.8rem;
+            }
+        }
+
+        @media (max-width:600px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cards-grid.cols-2,
+            .cards-grid.cols-3,
+            .cards-grid.cols-4,
+            .roles-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .slide-title {
+                font-size: 1.2rem;
+            }
+
+            .floating-notification,
+            .floating-icon {
+                display: none;
+            }
+
+            .laptop-mockup.large {
+                width: 260px;
+                height: 160px;
+            }
+
+            .phone-mockup.small {
+                width: 70px;
+                height: 130px;
+                left: -5px;
+                bottom: -2px;
+            }
+
+            .cycle-container {
+                width: 240px;
+                height: 240px;
+            }
+
+            .cycle-connector {
+                width: 200px;
+                height: 200px;
+            }
+
+            .cycle-node {
+                width: 40px;
+                height: 40px;
+                font-size: 0.45rem;
+            }
+
+            .table-header,
+            .table-row {
+                grid-template-columns: 1fr 0.8fr 0.8fr 0.8fr 1fr;
+            }
+
+            .table-cell {
+                font-size: 0.55rem;
+                padding: 0.4rem 0.2rem;
+            }
+
+            .internship-cycle-wrapper {
+                width: 300px;
+                height: 300px;
+            }
+
+            .internship-bg-circle,
+            .internship-progress-circle {
+                width: 250px;
+                height: 250px;
+            }
+
+            .internship-node {
+                width: 30px;
+                height: 30px;
+                font-size: 0.6rem;
+            }
+
+            .internship-center-content {
+                width: 90px;
+                height: 90px;
+            }
+
+            .internship-center-content h3 {
+                font-size: 0.6rem;
+            }
+
+            .team-row .glass-card {
+                flex: 0 0 140px;
+                max-width: 140px;
+            }
+
+            .qa-big-number {
+                font-size: 2.8rem;
+                padding: 0.3rem 1.5rem;
+            }
+
+            .team-avatar {
+                width: 72px;
+                height: 72px;
+                border-radius: 50%;
+                object-fit: cover;
+                display: block;
+                margin: 0 auto 14px;
+                border: 3px solid rgba(255, 255, 255, 0.9);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            }
+
+            .bottom-row {
+                display: flex;
+                justify-content: center;
+                gap: 24px;
+                margin-top: 24px;
+            }
+
+            .contact-card {
+                width: 430px;
+                min-height: 220px;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .contact-links {
+                display: flex;
+                gap: 24px;
+                margin-top: 18px;
+            }
+
+            .contact-links a {
+                text-decoration: none;
+                color: #1677ff;
+                font-weight: 600;
+            }
+
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="presentation" id="presentation">
+
+        <!-- SLIDE 0: Cover -->
+        <div class="slide active" data-index="0" id="slide-0">
+            <div class="slide-bg">
+                <div class="cover-gradient"></div>
+                <div class="cover-shape shape1"></div>
+                <div class="cover-shape shape2"></div>
+                <div class="cover-shape shape3"></div>
+                <div class="floating-notification n1"><span class="notif-icon"><i data-lucide="bell"></i></span> فرصة
+                    تدريب جديدة</div>
+                <div class="floating-notification n2"><span class="notif-icon"><i
+                            data-lucide="message-square"></i></span> ٣ رسائل غير مقروءة</div>
+                <div class="floating-notification n3"><span class="notif-icon"><i data-lucide="calendar"></i></span> قم
+                    بتسجيل حضورك</div>
+                <div class="floating-notification n4"><span class="notif-icon"><i
+                            data-lucide="clipboard-check"></i></span> مهمة جديدة</div>
+                <div class="floating-notification n5"><span class="notif-icon"><i data-lucide="building"></i></span>
+                    انضمت شركة جديدة</div>
+                <div class="floating-notification n6"><span class="notif-icon"><i data-lucide="file-text"></i></span> تم
+                    إرسال التقرير</div>
+                <div class="floating-icon i1"><i data-lucide="graduation-cap"></i></div>
+                <div class="floating-icon i2"><i data-lucide="briefcase"></i></div>
+                <div class="floating-icon i3"><i data-lucide="university"></i></div>
+                <div class="floating-icon i4"><i data-lucide="message-circle"></i></div>
+                <div class="floating-icon i5"><i data-lucide="calendar"></i></div>
+                <div class="floating-icon i6"><i data-lucide="brain"></i></div>
+            </div>
+            <div class="slide-content" style="gap:0.3rem;">
+                <img src="./image-removebg-preview.png" alt="Tadreeby"
+                    style="height: 130px; width: auto; margin:0 auto;">
+                <p style="font-size:1.05rem;font-weight:500;color:#3a3a5a;">where students, universities, and companies
+                    are connected</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 1: المشكلة -->
+        <div class="slide" data-index="1" id="slide-1">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 25% 30%,#FFF5F5 0%,transparent 50%),radial-gradient(ellipse at 70% 60%,#EEF5FF 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title highlight-title blue-highlight">المشكلة</h2>
+                <div class="cards-grid cols-2" style="max-width:700px;">
+                    <div class="glass-card" data-delay="0"><span class="card-icon"><i data-lucide="clipboard-list"
+                                style="color:var(--blue);"></i></span>
+                        <h3>إدارة بطرق تقليدية</h3>
+                        <p>إجراءات يدوية تزيد الوقت والجهد.</p>
+                    </div>
+                    <div class="glass-card" data-delay="150"><span class="card-icon"><i data-lucide="message-circle"
+                                style="color:var(--purple);"></i></span>
+                        <h3>تشتت التواصل</h3>
+                        <p>بريد ووسائل متفرقة وملفات متناثرة.</p>
+                    </div>
+                    <div class="glass-card" data-delay="300"><span class="card-icon"><i data-lucide="trending-down"
+                                style="color:var(--orange);"></i></span>
+                        <h3>ضعف المتابعة</h3>
+                        <p>لا متابعة مستمرة لتقدم الطلبة.</p>
+                    </div>
+                    <div class="glass-card" data-delay="450"><span class="card-icon"><i data-lucide="puzzle"></i></span>
+                        <h3>غياب منصة موحدة</h3>
+                        <p>كل جهة منفصلة بلا نظام جامع.</p>
+                    </div>
+                </div>
+                <p class="highlight-statement orange-highlight">المشكلة ليست في التدريب بل في طريقة إدارته.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 2: الحل -->
+        <div class="slide" data-index="2" id="slide-2">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 35% 25%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 60% 55%,#F7FCFB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">الحل</h2>
+                <p class="highlight-statement green-highlight">رحلة تدريب متكاملة داخل منصة واحدة.</p>
+                <div
+                    style="display:flex; align-items:center; justify-content:center; gap:2rem; flex-wrap:wrap; max-width:1150px; width:100%;">
+                    <div class="solution-mockups">
+                        <div class="laptop-mockup large">
+                            <div class="screen"><img src="./web.jpeg" alt="Dashboard"
+                                    style="width:100%; height:100%; object-fit:cover; border-radius:14px 14px 0 0;">
+                            </div>
+                            <div class="keyboard-line"></div>
+                        </div>
+                        <div class="phone-mockup small">
+                            <div class="camera-notch"></div><img src="./mobile.jpeg" alt="Mobile"
+                                style="width:100%; height:100%; object-fit:cover; border-radius:20px;">
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.7rem; max-width:380px;">
+                        <div class="solution-feature-card" data-delay="0"><i data-lucide="check-circle"
+                                style="color:var(--blue);"></i><span>إدارة
+                                التدريب الميداني بالكامل</span></div>
+                        <div class="solution-feature-card" data-delay="100"><i data-lucide="check-circle"
+                                style="color:var(--dark-orange);"></i><span>متابعة فورية للطلبة والمشرفين</span></div>
+                        <div class="solution-feature-card" data-delay="200"><i data-lucide="check-circle"
+                                style="color:var(--blue);"></i><span>تقارير وتقييمات ذكية</span></div>
+                        <div class="solution-feature-card" data-delay="300"><i data-lucide="check-circle"
+                                style="color:var(--dark-orange);"></i><span>إشعارات وتنبيهات لحظية</span></div>
+                        <div class="solution-feature-card" data-delay="400"><i data-lucide="check-circle"
+                                style="color:var(--blue);"></i><span>منصة
+                                موحدة لجميع الأطراف</span></div>
+                        <div class="solution-feature-card" data-delay="500"
+                            style="background:var(--light-purple); border-color:var(--purple);"><i
+                                data-lucide="sparkles" style="color:var(--purple);"></i><span
+                                style="color:var(--purple)">منصة ذكية حديثة متكاملة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 3: الأدوار -->
+        <div class="slide" data-index="3" id="slide-3">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 35% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 60% 50%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">الأدوار داخل المنصة</h2>
+                <div class="roles-cards-grid">
+                    <div class="glass-card" data-delay="0"><span class="card-icon"><i data-lucide="graduation-cap"
+                                style="color:var(--purple);"></i></span>
+                        <h3>Student</h3>
+                        <p>استعراض الفرص والتقديم والمتابعة.</p>
+                    </div>
+                    <div class="glass-card" data-delay="100"><span class="card-icon"><i data-lucide="user-check"
+                                style="color:var(--blue);"></i></span>
+                        <h3>University Supervisor</h3>
+                        <p>اعتماد الطلبة وتقييم الأداء.</p>
+                    </div>
+                    <div class="glass-card" data-delay="200"><span class="card-icon"><i data-lucide="building"
+                                style="color:var(--orange);"></i></span>
+                        <h3>Company Admin</h3>
+                        <p>إدارة فرص التدريب والمشرفين.</p>
+                    </div>
+                    <div class="glass-card" data-delay="300"><span class="card-icon"><i data-lucide="briefcase"
+                                style="color:var(--pink);"></i></span>
+                        <h3>Company Trainer</h3>
+                        <p>متابعة المتدربين وتقييمهم.</p>
+                    </div>
+                    <div class="glass-card" data-delay="400"><span class="card-icon"><i data-lucide="shield"></i></span>
+                        <h3>Super Admin</h3>
+                        <p>إدارة المنصة والصلاحيات.</p>
+                    </div>
+                    <div class="glass-card" data-delay="500"><span class="card-icon"><i data-lucide="user"
+                                style="color:var(--dark-orange);"></i></span>
+                        <h3>University Admin</h3>
+                        <p>إعداد التقارير والإشراف العام.</p>
+                    </div>
+                </div>
+                <p style="color:#5a5a7a;font-size:0.8rem;">لكل مستخدم تجربة مخصصة وصلاحيات تناسب دوره.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 4: Internship Life Cycle -->
+        <div class="slide" data-index="4" id="slide-4">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 35%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 40%,#F7FCFB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Internship Life Cycle</h2>
+                <p class="slide-subtitle">رحلة متكاملة تبدأ من إنشاء الفرصة وتنتهي بإصدار الشهادة.</p>
+                <div class="internship-cycle-wrapper" id="internship-cycle">
+                    <div class="internship-bg-circle"></div>
+                    <div class="internship-progress-circle" id="internship-progress"></div>
+                    <div class="internship-center-content">
+                        <h3>منصة واحدة تدير رحلة التدريب كاملة</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 6: Frontend تقنيات -->
+        <div class="slide" data-index="6" id="slide-6">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 55%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Frontend Framework & Tools</h2>
+                <div class="cards-grid cols-3" style="max-width:700px;">
+                    <div class="glass-card" data-delay="0"><span class="card-icon"><i data-lucide="globe"></i></span>
+                        <h3>React</h3>
+                        <p>مكتبة بناء واجهات المستخدم</p>
+                    </div>
+                    <div class="glass-card" data-delay="100"><span class="card-icon"><i data-lucide="zap"></i></span>
+                        <h3>Vite</h3>
+                        <p>أداة بناء سريعة وخفيفة</p>
+                    </div>
+                    <div class="glass-card" data-delay="200"><span class="card-icon"><i
+                                data-lucide="palette"></i></span>
+                        <h3>Tailwind CSS</h3>
+                        <p>إطار تصميم عصري وسريع</p>
+                    </div>
+                    <div class="glass-card" data-delay="300"><span class="card-icon"><i data-lucide="send"></i></span>
+                        <h3>Axios</h3>
+                        <p>إدارة طلبات HTTP</p>
+                    </div>
+                    <div class="glass-card" data-delay="400"><span class="card-icon"><i
+                                data-lucide="git-branch"></i></span>
+                        <h3>React Router</h3>
+                        <p>توجيه الصفحات</p>
+                    </div>
+                    <div class="glass-card" data-delay="500"><span class="card-icon"><i data-lucide="box"></i></span>
+                        <h3>Context API</h3>
+                        <p>إدارة الحالة العامة</p>
+                    </div>
+                </div>
+                <p class="highlight-statement blue-highlight">تجربة مستخدم سلسة وعصرية.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 8: Mobile تقنيات -->
+        <div class="slide" data-index="8" id="slide-8">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 55%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Mobile Framework & Tools</h2>
+                <div class="cards-grid cols-3" style="max-width:700px;">
+                    <div class="glass-card" data-delay="0"><span class="card-icon"><i
+                                data-lucide="smartphone"></i></span>
+                        <h3>Flutter</h3>
+                        <p>إطار عمل تطبيقات الجوال</p>
+                    </div>
+                    <div class="glass-card" data-delay="100"><span class="card-icon"><i data-lucide="cpu"></i></span>
+                        <h3>BLoC</h3>
+                        <p>إدارة الحالة</p>
+                    </div>
+                    <div class="glass-card" data-delay="200"><span class="card-icon"><i data-lucide="wifi"></i></span>
+                        <h3>Dio</h3>
+                        <p>عميل HTTP قوي</p>
+                    </div>
+                    <div class="glass-card" data-delay="300"><span class="card-icon"><i
+                                data-lucide="package"></i></span>
+                        <h3>GetIt</h3>
+                        <p>حقن التبعيات</p>
+                    </div>
+                    <div class="glass-card" data-delay="400"><span class="card-icon"><i data-lucide="map"></i></span>
+                        <h3>GoRouter</h3>
+                        <p>توجيه حديث</p>
+                    </div>
+                    <div class="glass-card" data-delay="500"><span class="card-icon"><i data-lucide="lock"></i></span>
+                        <h3>Secure Storage</h3>
+                        <p>تخزين آمن للبيانات</p>
+                    </div>
+                </div>
+                <p class="highlight-statement blue-highlight">تجربة موبايل سلسة وآمنة.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 7: Backend تقنيات -->
+        <div class="slide" data-index="7" id="slide-7">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 55%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Backend Framework & Tools</h2>
+                <div class="cards-grid cols-3" style="max-width:700px;">
+                    <div class="glass-card" data-delay="0"><span class="card-icon"><i data-lucide="server"></i></span>
+                        <h3>Node.js</h3>
+                        <p>بيئة تشغيل سريعة</p>
+                    </div>
+                    <div class="glass-card" data-delay="100"><span class="card-icon"><i data-lucide="layers"></i></span>
+                        <h3>NestJS</h3>
+                        <p>إطار عمل قوي ومنظم</p>
+                    </div>
+                    <div class="glass-card" data-delay="200"><span class="card-icon"><i
+                                data-lucide="database"></i></span>
+                        <h3>Prisma ORM</h3>
+                        <p>إدارة قواعد البيانات بسهولة</p>
+                    </div>
+                    <div class="glass-card" data-delay="300"><span class="card-icon"><i
+                                data-lucide="hard-drive"></i></span>
+                        <h3>PostgreSQL</h3>
+                        <p>قاعدة بيانات علائقية موثوقة</p>
+                    </div>
+                    <div class="glass-card" data-delay="400"><span class="card-icon"><i data-lucide="key"></i></span>
+                        <h3>JWT</h3>
+                        <p>مصادقة آمنة</p>
+                    </div>
+                    <div class="glass-card" data-delay="500"><span class="card-icon"><i data-lucide="mail"></i></span>
+                        <h3>Nodemailer</h3>
+                        <p>إرسال رسائل البريد الإلكتروني</p>
+                    </div>
+                </div>
+                <p class="highlight-statement blue-highlight">أداء عالي وأمان متكامل.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+
+
+        <!-- SLIDE 9: الأمان وإدارة الجلسات (تصميم متناسق) -->
+        <div class="slide" data-index="9" id="slide-9">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 55%,#F4EDFF 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">الأمان وإدارة الجلسات</h2>
+                <p class="slide-subtitle">طبقة أمان متكاملة تحمي بيانات المستخدمين</p>
+                <div class="cards-grid cols-3" style="max-width:900px;">
+                    <div class="glass-card blue-accent" data-delay="0"><span class="card-icon"><i
+                                data-lucide="shield-check"></i></span>
+                        <h3>مصادقة آمنة</h3>
+                        <p>JWT للتحقق من الهوية</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="100"><span class="card-icon"><i
+                                data-lucide="refresh-cw"></i></span>
+                        <h3>إدارة الجلسات</h3>
+                        <p>دعم Multi-Sessions</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="200"><span class="card-icon"><i
+                                data-lucide="clock"></i></span>
+                        <h3>تجديد الجلسات</h3>
+                        <p>Refresh Tokens</p>
+                    </div>
+                    <div class="glass-card green-accent" data-delay="300"><span class="card-icon"><i
+                                data-lucide="mail-check"></i></span>
+                        <h3>التحقق عبر البريد</h3>
+                        <p>رموز تحقق واستعادة</p>
+                    </div>
+                    <div class="glass-card green-accent" data-delay="400"><span class="card-icon"><i
+                                data-lucide="users"></i></span>
+                        <h3>إدارة الصلاحيات</h3>
+                        <p>Role-Based Access Control</p>
+                    </div>
+                    <div class="glass-card green-accent" data-delay="500"><span class="card-icon"><i
+                                data-lucide="building-2"></i></span>
+                        <h3>عزل بيانات المؤسسات</h3>
+                        <p>Multi-Tenancy</p>
+                    </div>
+                </div>
+                <p class="highlight-statement purple-highlight">الأمان ليس ميزة... إنه أساس المنصة.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 10: ضمان الجودة QA -->
+        <div class="slide" data-index="10" id="slide-10">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 55%,#F7FCFB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">Quality Assurance</h2>
+                <p class="slide-subtitle">اختبارات شاملة لضمان استقرار وأداء المنصة</p>
+                <div class="qa-big-number">400+</div>
+                <p class="qa-sub">حالة اختبار شاملة</p>
+                <div class="cards-grid cols-3" style="max-width:800px; margin-top:0.5rem;">
+                    <div class="glass-card green-accent" data-delay="0"><span class="card-icon"><i
+                                data-lucide="check-square"></i></span>
+                        <h3>Unit Testing</h3>
+                        <p>اختبار الوحدات باستخدام Jest</p>
+                    </div>
+                    <div class="glass-card green-accent" data-delay="100"><span class="card-icon"><i
+                                data-lucide="layers"></i></span>
+                        <h3>Integration Testing</h3>
+                        <p>تكامل المكونات والخدمات</p>
+                    </div>
+                    <div class="glass-card green-accent" data-delay="200"><span class="card-icon"><i
+                                data-lucide="server"></i></span>
+                        <h3>API Testing</h3>
+                        <p>Postman & Supertest</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="300"><span class="card-icon"><i
+                                data-lucide="monitor"></i></span>
+                        <h3>UI Testing</h3>
+                        <p>فحص واجهة المستخدم</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="400"><span class="card-icon"><i
+                                data-lucide="repeat"></i></span>
+                        <h3>E2E Testing</h3>
+                        <p>سيناريوهات كاملة</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="500"><span class="card-icon"><i
+                                data-lucide="zap"></i></span>
+                        <h3>Performance Testing</h3>
+                        <p>استقرار النظام تحت الحمل</p>
+                    </div>
+                </div>
+                <p class="highlight-statement green-highlight">400+ حالة اختبار تغطي جميع زوايا المنصة.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 11: ميزات الذكاء الاصطناعي -->
+        <div class="slide" data-index="11" id="slide-11">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 25%,#F4EDFF 0%,transparent 50%),radial-gradient(ellipse at 65% 55%,#EEF5FF 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">ميزات الذكاء الاصطناعي</h2>
+                <p class="slide-subtitle">حلول ذكية لتحسين تجربة التدريب واتخاذ القرار</p>
+                <div class="cards-grid cols-4">
+                    <div class="glass-card purple-accent" data-delay="0"><span class="card-icon"><i
+                                data-lucide="brain"></i></span>
+                        <h3>نظام توصية ذكي</h3>
+                        <p>اقتراح فرص التدريب</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="120"><span class="card-icon"><i
+                                data-lucide="trending-up"></i></span>
+                        <h3>التنبؤ بنسبة الإكمال</h3>
+                        <p>Completion Rate Prediction</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="240"><span class="card-icon"><i
+                                data-lucide="target"></i></span>
+                        <h3>التنبؤ بأداء الطالب</h3>
+                        <p>Student Performance</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="360"><span class="card-icon"><i
+                                data-lucide="graduation-cap"></i></span>
+                        <h3>توصيات تدريبية مخصصة</h3>
+                        <p>Personalized Training</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="480"><span class="card-icon"><i
+                                data-lucide="wrench"></i></span>
+                        <h3>تحليل فجوة المهارات</h3>
+                        <p>Skill Gap Analysis</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="600"><span class="card-icon"><i
+                                data-lucide="search"></i></span>
+                        <h3>تحليل فجوة الفرص</h3>
+                        <p>Opportunity Gap</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="720"><span class="card-icon"><i
+                                data-lucide="bar-chart"></i></span>
+                        <h3>متابعة ذكية للتقدم</h3>
+                        <p>Smart Progress</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="840"><span class="card-icon"><i
+                                data-lucide="clipboard-list"></i></span>
+                        <h3>تحليل التخصصات المطلوبة</h3>
+                        <p>Most Required Interns</p>
+                    </div>
+                </div>
+                <p class="highlight-statement purple-highlight">الذكاء الاصطناعي ليس ميزة إضافية...<br>بل جزء من رؤية
+                    المنصة المستقبلية.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 5: خطة التطوير -->
+        <div class="slide" data-index="5" id="slide-5">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 35% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 55% 50%,#F4EDFF 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">خطة التطوير</h2>
+                <p class="slide-subtitle">دورة تطوير متكاملة لضمان أفضل تجربة.</p>
+                <div class="cycle-container">
+                    <div class="cycle-connector"></div>
+                    <div class="cycle-center">منهجيتنا</div>
+                    <div class="cycle-node" style="left:190px;top:38px;"><i data-lucide="search"></i>بحث</div>
+                    <div class="cycle-node" style="left:320px;top:130px;"><i data-lucide="bar-chart"></i>تحليل</div>
+                    <div class="cycle-node" style="left:320px;top:250px;"><i data-lucide="paintbrush"></i>تصميم</div>
+                    <div class="cycle-node" style="left:190px;top:342px;"><i data-lucide="code"></i>تطوير</div>
+                    <div class="cycle-node" style="left:60px;top:250px;"><i data-lucide="check-circle"></i>اختبار</div>
+                    <div class="cycle-node" style="left:60px;top:130px;"><i data-lucide="monitor"></i>عرض</div>
+                </div>
+                <p style="color:#5a5a7a;font-size:0.8rem;">نعتمد منهجية تكرارية تبدأ بالبحث وتنتهي بالعرض مع تحسين
+                    مستمر.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+
+        <!-- SLIDE 12: لماذا Tadreeby -->
+        <!-- <div class="slide" data-index="12" id="slide-12">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 25% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 70% 60%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <span class="badge-premium">One of the first platforms in Gaza focused on unifying internship
+                    management</span>
+                <h2 class="slide-title" style="margin-top:0.2rem;">لماذا "Tadreeby"؟</h2>
+                <div class="cards-grid cols-3">
+                    <div class="glass-card blue-accent" data-delay="0"><span class="card-icon"><i
+                                data-lucide="network"></i></span>
+                        <h3>منظومة رقمية موحدة</h3>
+                        <p>تجمع الطالب والجامعة والشركة والمشرف.</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="150"><span class="card-icon"><i
+                                data-lucide="map-pin"></i></span>
+                        <h3>إدارة دورة التدريب بالكامل</h3>
+                        <p>من الفرصة حتى الشهادة.</p>
+                    </div>
+                    <div class="glass-card purple-accent" data-delay="300"><span class="card-icon"><i
+                                data-lucide="brain"></i></span>
+                        <h3>جاهزية للذكاء الاصطناعي</h3>
+                        <p>تحليلات وتوصيات ذكية.</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="450"><span class="card-icon"><i
+                                data-lucide="user"></i></span>
+                        <h3>تجربة مخصصة لكل مستخدم</h3>
+                        <p>صلاحيات تناسب كل دور.</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="600"><span class="card-icon"><i
+                                data-lucide="zap"></i></span>
+                        <h3>تعاون لحظي</h3>
+                        <p>تواصل وتغذية راجعة فورية.</p>
+                    </div>
+                    <div class="glass-card blue-accent" data-delay="750"><span class="card-icon"><i
+                                data-lucide="building"></i></span>
+                        <h3>بنية قابلة للتوسع</h3>
+                        <p>تدعم مؤسسات متعددة.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div> -->
+
+        <!-- SLIDE 13: ماذا يميز Tadreeby -->
+        <div class="slide" data-index="13" id="slide-13">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 60%,#F7FCFB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">ماذا يميز "Tadreeby"؟</h2>
+                <div class="comparison-table">
+                    <div class="table-header">
+                        <div class="table-cell">الميزة</div>
+                        <div class="table-cell">الطرق التقليدية</div>
+                        <div class="table-cell">أنظمة الجامعات</div>
+                        <div class="table-cell">منصات التوظيف</div>
+                        <div class="table-cell tadreeby-cell">Tadreeby</div>
+                    </div>
+                    <div class="table-row" data-delay="0">
+                        <div class="table-cell">إدارة فرص التدريب</div>
+                        <div class="table-cell"><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="check" class="check-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="100">
+                        <div class="table-cell">ربط الجامعة بالشركة</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="minus" class="partial-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="200">
+                        <div class="table-cell">متابعة التدريب</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="minus" class="partial-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="300">
+                        <div class="table-cell">تقييم الطالب</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="minus" class="partial-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="400">
+                        <div class="table-cell">إدارة المشرفين</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="500">
+                        <div class="table-cell">إصدار الشهادات</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="minus" class="partial-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="600">
+                        <div class="table-cell">منصة موحدة</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><i data-lucide="check" class="check-icon"></i></div>
+                    </div>
+                    <div class="table-row" data-delay="700">
+                        <div class="table-cell">دعم الذكاء الاصطناعي</div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell"><i data-lucide="x" class="cross-icon"></i></div>
+                        <div class="table-cell tadreeby-cell"><span style="color:#1677FF; font-weight:700;">AI
+                                Roadmap</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 14: السوق المستهدف -->
+        <div class="slide" data-index="14" id="slide-14">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 20% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 75% 55%,#F7FCFB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">السوق المستهدف</h2>
+                <div
+                    style="display:flex; gap:2rem; flex-wrap:wrap; justify-content:center; align-items:flex-start; width:100%;">
+                    <div style="display:flex; flex-direction:column; gap:0.8rem; min-width:250px;">
+                        <h3 style="color:#1677FF; margin-bottom:0.2rem;">الفئات المستهدفة</h3>
+                        <div class="glass-card" data-delay="0"><span class="card-icon"><i
+                                    data-lucide="graduation-cap"></i></span>
+                            <h3>الجامعات</h3>
+                            <p>إدارة التدريب والإشراف الأكاديمي.</p>
+                        </div>
+                        <div class="glass-card" data-delay="150"><span class="card-icon"><i
+                                    data-lucide="building"></i></span>
+                            <h3>الشركات</h3>
+                            <p>إدارة فرص التدريب والمتدربين.</p>
+                        </div>
+                        <div class="glass-card" data-delay="300"><span class="card-icon"><i
+                                    data-lucide="home"></i></span>
+                            <h3>مراكز التدريب</h3>
+                            <p>تنظيم البرامج وإدارة المشاركين.</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.8rem; min-width:280px;">
+                        <h3 style="color:#1E8B3F; margin-bottom:0.2rem;">العائد المالي مستقبلا</h3>
+                        <div class="glass-card green-accent" data-delay="100"><span class="card-icon"><i
+                                    data-lucide="building"></i></span>
+                            <h3>Companies</h3>
+                            <p>خطط اشتراك شهرية / سنوية.</p>
+                        </div>
+                        <div class="glass-card green-accent" data-delay="250"><span class="card-icon"><i
+                                    data-lucide="graduation-cap"></i></span>
+                            <h3>Universities</h3>
+                            <p>اشتراكات سنوية كاملة.</p>
+                        </div>
+                        <div class="glass-card green-accent" data-delay="400"><span class="card-icon"><i
+                                    data-lucide="briefcase"></i></span>
+                            <h3>Enterprise</h3>
+                            <p>حلول مخصصة وربط مع الأنظمة.</p>
+                        </div>
+                        <div class="glass-card purple-accent" data-delay="550"><span class="card-icon"><i
+                                    data-lucide="cpu"></i></span>
+                            <h3>AI Solutions</h3>
+                            <p>تحليلات وتوصيات ذكية حسب الطلب.</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="highlight-statement green-highlight">منصة SaaS قابلة للنمو والتوسع.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 15: الخطوة القادمة -->
+        <div class="slide" data-index="15" id="slide-15">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 35%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 65% 50%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">الخطوة القادمة</h2>
+                <p class="slide-subtitle">من الفكرة... إلى منتج يحدث أثرًا حقيقيًا.</p>
+                <div class="cards-grid cols-2" style="max-width:700px;">
+                    <div class="glass-card orange-accent" data-delay="0"><span class="card-icon"><i
+                                data-lucide="handshake"></i></span>
+                        <h3>شراكات استراتيجية</h3>
+                        <p>بناء علاقات مع الجامعات والشركات.</p>
+                    </div>
+                    <div class="glass-card orange-accent" data-delay="150"><span class="card-icon"><i
+                                data-lucide="building"></i></span>
+                        <h3>بيئة عمل داعمة</h3>
+                        <p>توفير بنية تحتية للنمو والتوسع.</p>
+                    </div>
+                    <div class="glass-card orange-accent" data-delay="300"><span class="card-icon"><i
+                                data-lucide="globe"></i></span>
+                        <h3>الوصول إلى الجامعات</h3>
+                        <p>توسيع نطاق المستخدمين المستهدفين.</p>
+                    </div>
+                    <div class="glass-card orange-accent" data-delay="450"><span class="card-icon"><i
+                                data-lucide="rocket"></i></span>
+                        <h3>دعم النمو والتوسع</h3>
+                        <p>تطوير المنصة لتصبح الحل الأمثل.</p>
+                    </div>
+                </div>
+                <p class="highlight-statement orange-highlight">مع الشريك المناسب... تصبح المنصة المرجعية.</p>
+            </div>
+            <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+        </div>
+
+        <!-- SLIDE 16: فريق العمل -->
+        <div class="slide" data-index="16" id="slide-16">
+            <div class="slide-bg"
+                style="background:radial-gradient(ellipse at 30% 35%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 60% 50%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+            </div>
+            <div class="slide-content">
+                <h2 class="slide-title">فريق العمل</h2>
+                <p class="slide-subtitle">Nexus Team</p>
+                <div class="team-grid-3-3-1">
+                    <div class="team-row">
+                        <div class="glass-card team-card" data-delay="0">
+                            <img src="./team/shahd.png" alt="Shahd Abu Sharif" class="team-avatar">
+                            <h3>Shahd abu sharif</h3>
+                            <p>Backend & Team Lead</p>
+                        </div>
+                        <div class="glass-card team-card" data-delay="200">
+                            <img src="./team/afnan.jpeg" alt="Afnan" class="team-avatar">
+                            <h3>Afnan Kullab</h3>
+                            <p>Frontend Developer</p>
+                        </div>
+                        <div class="glass-card team-card" data-delay="400">
+                            <img src="./team/deema.jpeg" alt="Deema" class="team-avatar">
+                            <h3>Deema Abd Alhady</h3>
+                            <p>UI/UX Designer</p>
+                        </div>
+                    </div>
+                    <div class="team-row">
+                        <div class="glass-card team-card" data-delay="600">
+                            <img src="./team/malk.webp" alt="Malk" class="team-avatar">
+                            <h3>Malk Jouda</h3>
+                            <p>UI/UX Designer</p>
+                        </div>
+                        <div class="glass-card team-card" data-delay="800">
+                            <img src="./team/shahed.jpeg" alt="Shahed" class="team-avatar">
+                            <h3>Shahed El Mobayed</h3>
+                            <p>Mobile Developer</p>
+                        </div>
+                        <div class="glass-card team-card" data-delay="1000">
+                            <img src="./team/marah.jpeg" alt="Marah" class="team-avatar">
+                            <h3>Marah Abu Adbo</h3>
+                            <p>AI Engineer</p>
+                        </div>
+                    </div>
+                    <div class="team-row" style="justify-content:center;">
+                        <div class="glass-card team-card" data-delay="1200">
+                            <img src="./team/maryam.jpeg" alt="Maryam" class="team-avatar">
+                            <h3>Maryam Thabet</h3>
+                            <p>QA Engineer</p>
+                        </div>
+
+                        </div>
+
+
+                    </div>
+                    <p style="font-weight:700;font-size:0.95rem;color:#1677FF;margin-top:0.3rem;">٧ متخصصين | فريق واحد
+                        |
+                        رؤية واحدة</p>
+                </div>
+                <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+            </div>
+
+            <!-- SLIDE 17: تجربة المنصة -->
+            <div class="slide" data-index="17" id="slide-17">
+                <div class="slide-bg"
+                    style="background:radial-gradient(ellipse at 35% 30%,#EEF5FF 0%,transparent 50%),radial-gradient(ellipse at 60% 55%,#FDF1EB 0%,transparent 50%),#FAFBFC;">
+                </div>
+                <div class="slide-content">
+                    <img src="./image-removebg-preview.png" alt="Tadreeby"
+                        style="height: 50px; width: auto; margin:0 auto;">
+                    <p style="color:#5a5a7a;">Let's see it in action.</p>
+                    <div class="laptop-mockup" style="margin-top:0.5rem;">
+                        <div class="screen"><i data-lucide="layout-dashboard"
+                                style="width:26px;height:26px;color:#1677FF;"></i><span></span></div>
+                        <div class="keyboard-line"></div>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;margin-top:0.3rem;">
+                        <span
+                            style="background:rgba(22,119,255,0.07);color:#1677FF;padding:0.2rem 0.8rem;border-radius:18px;font-size:0.7rem;">🎓
+                            طالب</span>
+                        <span
+                            style="background:rgba(22,119,255,0.07);color:#1677FF;padding:0.2rem 0.8rem;border-radius:18px;font-size:0.7rem;">🏢
+                            شركة</span>
+                        <span
+                            style="background:rgba(22,119,255,0.07);color:#1677FF;padding:0.2rem 0.8rem;border-radius:18px;font-size:0.7rem;">🏛️
+                            جامعة</span>
+                        <span
+                            style="background:rgba(22,119,255,0.07);color:#1677FF;padding:0.2rem 0.8rem;border-radius:18px;font-size:0.7rem;">📱
+                            تطبيق</span>
+                    </div>
+                </div>
+                <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+            </div>
+
+            <!-- SLIDE 18: شكراً لكم -->
+            <div class="slide" data-index="18" id="slide-18">
+                <div class="slide-bg">
+                    <div class="thankyou-bg"></div>
+                    <div class="floating-icon i1"><i data-lucide="message-circle"></i></div>
+                    <div class="floating-icon i2"><i data-lucide="help-circle"></i></div>
+                    <div class="floating-icon i3"><i data-lucide="mail"></i></div>
+                </div>
+                <div class="slide-content" style="gap:0.5rem;">
+                    <img src="./image-removebg-preview.png" alt="Tadreeby"
+                        style="height: 50px; width: auto; margin:0 auto;">
+                    <h2 class="slide-title" style="font-size:2.2rem;">شكراً لكم</h2>
+                    <p class="slide-subtitle">يسعدنا الاستماع إلى أسئلتكم وملاحظاتكم.</p>
+                    <p style="font-weight:600; color:var(--purple); font-size:0.9rem; margin-top:0.5rem;">Nexus Team</p>
+                </div>
+                <div class="slide-footer">تم التطوير ضمن برنامج أكاديمية طاقات</div>
+            </div>
+        </div>
+
+        <div class="nav-arrows">
+            <button class="nav-arrow" id="prev-btn">▶</button>
+            <div class="nav-dots" id="nav-dots"></div>
+            <button class="nav-arrow" id="next-btn">◀</button>
+        </div>
+
+        <script>
+            (function () {
+                lucide.createIcons();
+                const slides = document.querySelectorAll('.slide');
+                const totalSlides = slides.length;
+                let currentIndex = 0;
+                let isTransitioning = false;
+                let wheelTimeout = null;
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+                const navDotsContainer = document.getElementById('nav-dots');
+
+                for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = 'nav-dot';
+                    if (i === 0) dot.classList.add('active');
+                    dot.addEventListener('click', () => goToSlide(i));
+                    navDotsContainer.appendChild(dot);
+                }
+                const navDots = document.querySelectorAll('.nav-dot');
+
+                function updateDots() {
+                    navDots.forEach((d, i) => d.classList.toggle('active', i === currentIndex));
+                }
+
+                function goToSlide(index) {
+                    if (isTransitioning || index === currentIndex || index < 0 || index >= totalSlides) return;
+                    isTransitioning = true;
+                    const direction = index > currentIndex ? 'right' : 'left';
+                    const oldSlide = slides[currentIndex];
+                    const newSlide = slides[index];
+                    oldSlide.classList.remove('active');
+                    oldSlide.classList.add(direction === 'right' ? 'exit-left' : 'exit-right');
+                    newSlide.classList.remove('exit-left', 'exit-right', 'enter-left', 'enter-right');
+                    newSlide.classList.add(direction === 'right' ? 'enter-right' : 'enter-left');
+                    void newSlide.offsetWidth;
+                    newSlide.classList.remove('enter-right', 'enter-left');
+                    newSlide.classList.add('active');
+                    currentIndex = index;
+                    updateDots();
+                    revealSlideElements(newSlide);
+                    triggerSlideAnimations(newSlide);
+                    setTimeout(() => {
+                        oldSlide.classList.remove('exit-left', 'exit-right');
+                        isTransitioning = false;
+                        lucide.createIcons();
+                    }, 700);
+                }
+
+                function revealSlideElements(slide) {
+                    const cards = slide.querySelectorAll('.glass-card');
+                    cards.forEach((card, i) => {
+                        card.classList.remove('revealed');
+                        const d = card.getAttribute('data-delay') || i * 120;
+                        setTimeout(() => card.classList.add('revealed'), parseInt(d) + 100);
+                    });
+                    const sCards = slide.querySelectorAll('.solution-feature-card');
+                    sCards.forEach((card, i) => {
+                        card.classList.remove('revealed');
+                        const d = card.getAttribute('data-delay') || i * 120;
+                        setTimeout(() => card.classList.add('revealed'), parseInt(d) + 100);
+                    });
+                    const cycleNodes = slide.querySelectorAll('.cycle-node');
+                    cycleNodes.forEach((n, i) => {
+                        n.style.opacity = '0';
+                        n.style.transform = 'translate(-50%,-50%) scale(0.5)';
+                        setTimeout(() => {
+                            n.style.opacity = '1';
+                            n.style.transition = 'all 0.5s cubic-bezier(0.22,0.61,0.36,1)';
+                            n.style.transform = 'translate(-50%,-50%) scale(1)';
+                        }, i * 100 + 200);
+                    });
+                    const tableCells = slide.querySelectorAll('.table-cell');
+                    tableCells.forEach((cell, i) => {
+                        cell.classList.remove('revealed');
+                        const d = cell.parentElement?.getAttribute('data-delay') || i * 80;
+                        setTimeout(() => cell.classList.add('revealed'), parseInt(d) + 100);
+                    });
+                }
+
+                function triggerSlideAnimations(slide) {
+                    const index = parseInt(slide.getAttribute('data-index'));
+                    if (index === 4) {
+                        const wrapper = document.getElementById('internship-cycle');
+                        if (wrapper && wrapper.querySelectorAll('.internship-node').length === 0) {
+                            const stages = [
+                                { icon: 'file-plus', label: 'إنشاء فرصة التدريب' },
+                                { icon: 'graduation-cap', label: 'تقديم الطالب' },
+                                { icon: 'search', label: 'مراجعة الطلب' },
+                                { icon: 'university', label: 'اعتماد الطلب' },
+                                { icon: 'play', label: 'بدء التدريب' },
+                                { icon: 'clipboard-list', label: 'المهام اليومية' },
+                                { icon: 'bar-chart', label: 'التقييم' },
+                                { icon: 'file-text', label: 'التقرير النهائي' },
+                                { icon: 'trophy', label: 'الشهادة' }
+                            ];
+                            const totalStages = stages.length;
+                            const radius = 180, centerX = 250, centerY = 250, startAngle = -90;
+                            const progressDiv = document.getElementById('internship-progress');
+                            stages.forEach((stage, i) => {
+                                const angle = startAngle + (i * (360 / totalStages));
+                                const angleRad = (angle * Math.PI) / 180;
+                                const x = centerX + radius * Math.cos(angleRad);
+                                const y = centerY + radius * Math.sin(angleRad);
+                                const node = document.createElement('div');
+                                node.className = 'internship-node';
+                                node.style.left = x + 'px';
+                                node.style.top = y + 'px';
+                                node.innerHTML = `<i data-lucide="${stage.icon}"></i>`;
+                                wrapper.appendChild(node);
+                                const labelX = centerX + (radius + 40) * Math.cos(angleRad);
+                                const labelY = centerY + (radius + 40) * Math.sin(angleRad);
+                                const label = document.createElement('div');
+                                label.className = 'internship-label';
+                                label.style.left = labelX + 'px';
+                                label.style.top = labelY + 'px';
+                                label.textContent = stage.label;
+                                wrapper.appendChild(label);
+                            });
+                            lucide.createIcons();
+                            const nodes = wrapper.querySelectorAll('.internship-node');
+                            const labels = wrapper.querySelectorAll('.internship-label');
+                            nodes.forEach((node, i) => {
+                                setTimeout(() => {
+                                    node.classList.add('revealed');
+                                    if (labels[i]) labels[i].classList.add('revealed');
+                                    const progressPercent = ((i + 1) / totalStages) * 100;
+                                    const degrees = (progressPercent / 100) * 360;
+                                    if (i < totalStages - 1) {
+                                        node.classList.add('completed');
+                                        const color = i < totalStages * 0.3 ? 'var(--blue)' : i < totalStages * 0.7 ? 'var(--orange)' : 'var(--green)';
+                                        progressDiv.style.background = `conic-gradient(${color} ${degrees}deg, transparent ${degrees}deg)`;
+                                        progressDiv.style.border = 'none';
+                                        progressDiv.style.mask = 'radial-gradient(transparent 197px, black 200px)';
+                                        progressDiv.style.webkitMask = 'radial-gradient(transparent 197px, black 200px)';
+                                    } else {
+                                        node.classList.add('final-step');
+                                        progressDiv.style.background = `conic-gradient(var(--green) 360deg, transparent 360deg)`;
+                                        progressDiv.style.border = 'none';
+                                        progressDiv.style.mask = 'radial-gradient(transparent 197px, black 200px)';
+                                        progressDiv.style.webkitMask = 'radial-gradient(transparent 197px, black 200px)';
+                                    }
+                                }, 500 + i * 250);
+                            });
+                        }
+                    }
+                }
+
+                document.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (wheelTimeout) return;
+                    wheelTimeout = setTimeout(() => {
+                        wheelTimeout = null;
+                        if (e.deltaY > 0 || e.deltaX > 0) goToSlide(currentIndex + 1);
+                        else goToSlide(currentIndex - 1);
+                    }, 400);
+                }, { passive: false });
+
+                prevBtn.addEventListener('click', () => goToSlide(currentIndex - 1));
+                nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goToSlide(currentIndex + 1); }
+                    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goToSlide(currentIndex - 1); }
+                });
+                let tx = 0;
+                document.addEventListener('touchstart', e => { tx = e.changedTouches[0].screenX; }, { passive: true });
+                document.addEventListener('touchend', e => {
+                    const d = tx - e.changedTouches[0].screenX;
+                    if (Math.abs(d) > 50) { if (d > 0) goToSlide(currentIndex + 1); else goToSlide(currentIndex - 1); }
+                });
+                revealSlideElements(slides[0]);
+            })();
+        </script>
+</body>
+
+</html>
